@@ -16,7 +16,7 @@ def run() -> None:
     """Run the GUI"""
     game = Game()
     board = Board()
-    pprint(board.grid.rows[1])
+    pprint(board.grid.rows)
 
     game.run()
 
