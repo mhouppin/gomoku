@@ -14,6 +14,7 @@ class Game:
 
     def __init__(self, windows_size: Coordinate = Coordinate(x=1080, y=720)) -> None:
         pygame.init()
+        self.windows_size = windows_size
         self.screen = pygame.display.set_mode(size=windows_size.to_tuple())
         self.running = True
 
