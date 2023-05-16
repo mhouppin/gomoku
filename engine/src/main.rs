@@ -1,3 +1,7 @@
+mod engine;
+
+use engine::bitboard::Bitboard;
+
 fn main() {
-    println!("Hello, world!");
+    print!("{}", Bitboard::LEFT_EDGE);
 }
