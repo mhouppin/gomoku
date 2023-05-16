@@ -4,6 +4,8 @@ use std::ops::{
     ShrAssign,
 };
 
+use super::types::{ROW_SIZE, File, Rank, Square};
+
 #[derive(Clone, Copy)]
 pub struct Bitboard([u64; 6]);
 
@@ -30,28 +32,28 @@ impl Bitboard {
         Self([0; 6])
     }
 
-    pub fn get_square(&self, sq: u16) -> bool {
-        ((self.0[(sq / 64) as usize] >> (sq % 64)) & 1) != 0
+    pub fn get_square(&self, sq: Square) -> bool {
+        ((self.0[(sq.value() / 64) as usize] >> (sq.value() % 64)) & 1) != 0
     }
 
-    pub fn set_square(&mut self, sq: u16) {
-        self.0[(sq / 64) as usize] |= 1u64 << (sq % 64);
+    pub fn set_square(&mut self, sq: Square) {
+        self.0[(sq.value() / 64) as usize] |= 1u64 << (sq.value() % 64);
     }
 
-    pub fn rst_square(&mut self, sq: u16) {
-        self.0[(sq / 64) as usize] &= !(1u64 << (sq % 64));
+    pub fn rst_square(&mut self, sq: Square) {
+        self.0[(sq.value() / 64) as usize] &= !(1u64 << (sq.value() % 64));
     }
 
-    pub fn swp_square(&mut self, sq: u16) {
-        self.0[(sq / 64) as usize] ^= 1u64 << (sq % 64);
+    pub fn swp_square(&mut self, sq: Square) {
+        self.0[(sq.value() / 64) as usize] ^= 1u64 << (sq.value() % 64);
     }
 
     pub fn shift_up(&self) -> Self {
-        *self >> 19
+        *self >> ROW_SIZE as u32
     }
 
     pub fn shift_down(&self) -> Self {
-        *self << 19
+        *self << ROW_SIZE as u32
     }
 
     pub fn shift_left(&self) -> Self {
@@ -65,18 +67,26 @@ impl Bitboard {
 
 impl Display for Bitboard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for rank in 0..19 {
-            for file in 0..19 {
+        let mut rank = Rank::FIRST;
+
+        while rank < Rank::LAST {
+            let mut file = File::FIRST;
+
+            while file < File::LAST {
                 write!(
                     f,
                     "{}",
-                    if self.get_square(rank * 19 + file) {
+                    if self.get_square(Square::from(file, rank)) {
                         'x'
                     } else {
                         '.'
                     }
                 )?;
+
+                file += 1;
             }
+
+            rank += 1;
             writeln!(f)?;
         }
 
