@@ -1,5 +1,5 @@
 use super::bitboard::{Bitboard, BitboardIter};
-use super::types::{Stone, BOARD_SIZE, Square};
+use super::types::{Square, Stone, BOARD_SIZE};
 use std::fmt;
 
 #[derive(Debug)]
