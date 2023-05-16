@@ -10,5 +10,15 @@ use crate::core::types::{File, Rank, Square, Stone};
 use crate::engine::movegen::Movegen;
 
 fn main() {
-    println!("{}", crate::core::magic::MAGIC_STRUCT.len());
+    let mut board = Board::new();
+
+    board.push(Square::from(File::new(9), Rank::new(9)));
+    board.push(Square::from(File::new(10), Rank::new(9)));
+    board.push(Square::from(File::new(8), Rank::new(8)));
+    board.push(Square::from(File::new(10), Rank::new(10)));
+    board.push(Square::from(File::new(7), Rank::new(7)));
+    board.push(Square::from(File::new(10), Rank::new(11)));
+    board.push(Square::from(File::new(10), Rank::new(12)));
+
+    println!("{}", board);
 }
