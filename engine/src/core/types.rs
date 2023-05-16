@@ -1,15 +1,16 @@
 use std::cmp::{PartialEq, PartialOrd};
+use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 pub const ROW_SIZE: u16 = 19;
 pub const SQUARE_COUNT: u16 = ROW_SIZE * ROW_SIZE;
 pub const BOARD_SIZE: usize = SQUARE_COUNT as usize;
 
-#[derive(Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub struct File(u8);
-#[derive(Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub struct Rank(u8);
-#[derive(Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub struct Square(u16);
 
 impl File {
@@ -18,6 +19,12 @@ impl File {
 
     pub fn new(value: u8) -> Self {
         Self(value)
+    }
+}
+
+impl fmt::Display for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", (97 + self.0) as char)
     }
 }
 
@@ -63,6 +70,12 @@ impl Rank {
 
     pub fn new(value: u8) -> Self {
         Self(value)
+    }
+}
+
+impl fmt::Display for Rank {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:02}", self.0)
     }
 }
 
@@ -148,6 +161,12 @@ impl Square {
     }
 }
 
+impl fmt::Display for Square {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.file(), self.rank())
+    }
+}
+
 impl Add<u16> for Square {
     type Output = Self;
 
@@ -176,7 +195,7 @@ impl SubAssign<u16> for Square {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Stone {
     Empty,
     Black,
@@ -184,11 +203,25 @@ pub enum Stone {
 }
 
 impl Stone {
+    pub const LIST: [Self; 3] = [Self::Empty, Self::Black, Self::White];
+
     pub fn flip(&self) -> Stone {
         match *self {
             Self::Black => Self::White,
             Self::White => Self::Black,
             Self::Empty => Self::Empty,
         }
+    }
+}
+
+impl fmt::Display for Stone {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let c = match *self {
+            Self::Black => 'x',
+            Self::White => 'o',
+            Self::Empty => '.',
+        };
+
+        write!(f, "{}", c)
     }
 }
