@@ -172,19 +172,23 @@ pub fn build_magic() -> Result<[OwnedAlignment; 0x10000], ()> {
         Alignment::Three,
     );
 
-    count += magic_init_pattern(&mut magic,
+    count += magic_init_pattern(
+        &mut magic,
         &".xx.xx.".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(&mut magic,
+    count += magic_init_pattern(
+        &mut magic,
         &"oxx.xx.".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(&mut magic,
+    count += magic_init_pattern(
+        &mut magic,
         &".xx.xxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(&mut magic,
+    count += magic_init_pattern(
+        &mut magic,
         &"oxx.xxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
