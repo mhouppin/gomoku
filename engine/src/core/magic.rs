@@ -49,12 +49,15 @@ pub fn build_magic() -> [OwnedAlignment; 0x10000] {
     let mut count = 0;
     let mut pattern = vec![Stone::Black; 5];
 
+    // xxxxx
     count += magic_init_pattern(&mut magic, &pattern, Alignment::Five);
 
+    // .xxxx.
     pattern[0] = Stone::Empty;
     pattern.push(Stone::Empty);
     count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenFour);
 
+    // oxxxx.
     pattern[0] = Stone::White;
     count += magic_init_pattern(&mut magic, &pattern, Alignment::Four);
     pattern[5] = Stone::White;
@@ -62,13 +65,43 @@ pub fn build_magic() -> [OwnedAlignment; 0x10000] {
     pattern[0] = Stone::Empty;
     count += magic_init_pattern(&mut magic, &pattern, Alignment::Four);
 
+    // .xxx.
     pattern.pop();
     pattern[4] = Stone::Empty;
     count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenThree);
 
+    // oxxx.
     pattern[0] = Stone::White;
     count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
     pattern[4] = Stone::White;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+    pattern[0] = Stone::Empty;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+
+    // .x.xx.
+    pattern.push(Stone::Empty);
+    pattern[4] = Stone::Black;
+    pattern[2] = Stone::Empty;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenThree);
+
+    // ox.xx.
+    pattern[0] = Stone::White;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+    pattern[5] = Stone::White;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+    pattern[0] = Stone::Empty;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+
+    // .xx.x.
+    pattern[5] = Stone::Empty;
+    pattern[2] = Stone::Black;
+    pattern[3] = Stone::Empty;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenThree);
+
+    // oxx.x.
+    pattern[0] = Stone::White;
+    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+    pattern[5] = Stone::White;
     count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
     pattern[0] = Stone::Empty;
     count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
@@ -143,8 +176,12 @@ pub fn magic_init_pattern(
 
             shift[8] = left;
 
-            if shift[4] != Stone::Black {
+            if shift[4] == Stone::White {
                 break;
+            }
+
+            if shift[4] == Stone::Empty {
+                continue;
             }
 
             magic[stones_to_mask(&shift) as usize] = OwnedAlignment {
