@@ -1,6 +1,7 @@
 """GUI commands"""
 import click
 
+from srcs.utils.constants import WINDOW_HEIGHT, WINDOW_WIDTH
 from srcs.builders import AppBuilder
 from srcs.models import App
 
@@ -16,12 +17,12 @@ def run() -> None:
     app_builder: AppBuilder = AppBuilder()
 
     app: App = (
-        app_builder.set_windows_size(800, 600)
+        app_builder.set_windows_size(WINDOW_WIDTH, WINDOW_HEIGHT)
         .set_menu_title("Gomoku")
-        .set_menu_dark_theme()
-        .add_menu_button("1 vs 1", lambda: print("1 vs 1"))
-        .add_menu_button("1 vs AI", lambda: print("1 vs AI"))
-        .add_menu_button("AI vs AI", lambda: print("AI vs AI"))
+        .set_dark_theme()
+        .add_menu_button("1 vs 1", lambda menu: menu.disable())
+        .add_menu_button("1 vs AI", lambda menu: print("1 vs AI"))
+        .add_menu_button("AI vs AI", lambda menu: print("AI vs AI"))
         .add_menu_quit_button()
         .build()
     )
