@@ -47,20 +47,23 @@ impl StonePattern {
     }
 }
 
+#[derive(Debug)]
+pub struct PatternError(());
+
 impl FromStr for StonePattern {
-    type Err = ();
+    type Err = PatternError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(StonePattern(
             s.as_bytes()
-                .into_iter()
+                .iter()
                 .map(|b| match b {
                     46 => Ok(Stone::Empty),
                     120 => Ok(Stone::Black),
                     111 => Ok(Stone::White),
-                    _ => Err(()),
+                    _ => Err(PatternError(())),
                 })
-                .collect::<Result<Vec<_>, ()>>()?,
+                .collect::<Result<Vec<_>, PatternError>>()?,
         ))
     }
 }
@@ -70,7 +73,7 @@ lazy_static! {
         build_magic().expect("Failed to generate magic struct");
 }
 
-pub fn build_magic() -> Result<[OwnedAlignment; 0x10000], ()> {
+pub fn build_magic() -> Result<[OwnedAlignment; 0x10000], PatternError> {
     let mut magic = [OwnedAlignment {
         align: Alignment::NoAlign,
         owned: false,
@@ -213,8 +216,8 @@ pub fn magic_init_pattern(
     for c in 0..range {
         let mut ci = c;
 
-        for i in 0..9 - pattern.len() {
-            base[i] = match ci % 3 {
+        for value in base.iter_mut().take(9 - pattern.len()) {
+            *value = match ci % 3 {
                 0 => Stone::Empty,
                 1 => Stone::Black,
                 _ => Stone::White,

@@ -4,10 +4,8 @@ extern crate lazy_static;
 pub mod core;
 pub mod engine;
 
-use crate::core::bitboard::Bitboard;
 use crate::core::board::Board;
-use crate::core::types::{File, Rank, Square, Stone};
-use crate::engine::movegen::Movegen;
+use crate::core::types::{File, Rank, Square};
 
 fn main() {
     let mut board = Board::new();
