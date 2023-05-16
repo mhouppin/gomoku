@@ -1,9 +1,8 @@
 """GUI commands"""
-from pprint import pprint
 import click
 
-from srcs.board import Board
-from srcs.game import Game
+from srcs.builders import AppBuilder
+from srcs.models import App
 
 
 @click.group()
@@ -14,11 +13,20 @@ def gui() -> None:
 @gui.command()
 def run() -> None:
     """Run the GUI"""
-    game = Game()
-    board = Board()
-    pprint(board.grid.rows)
+    app_builder: AppBuilder = AppBuilder()
 
-    game.run()
+    app: App = (
+        app_builder.set_windows_size(800, 600)
+        .set_menu_title("Gomoku")
+        .set_menu_dark_theme()
+        .add_menu_button("1 vs 1", lambda: print("1 vs 1"))
+        .add_menu_button("1 vs AI", lambda: print("1 vs AI"))
+        .add_menu_button("AI vs AI", lambda: print("AI vs AI"))
+        .add_menu_quit_button()
+        .build()
+    )
+
+    app.run()
 
 
 if __name__ == "__main__":

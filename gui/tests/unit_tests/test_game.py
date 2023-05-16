@@ -1,8 +1,5 @@
 """Module unit tests for Game"""
-import pygame
-
-from srcs.models.coordinate import Coordinate
-from srcs.game import Game
+from srcs.models.app import App
 
 
 class TestGame:
@@ -10,7 +7,5 @@ class TestGame:
 
     def test_construct_game_works(self) -> None:
         """Test if the constructor of Game works"""
-        game = Game()
-        assert game.running is True
-        assert isinstance(game.screen, pygame.Surface)
-        assert isinstance(game.windows_size, Coordinate)
+        game = App()
+        assert game.is_running is False
