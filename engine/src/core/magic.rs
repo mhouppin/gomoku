@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use super::types::Stone;
 
 #[derive(Clone, Copy, Debug)]
@@ -36,79 +38,160 @@ pub struct SquareAlignment {
     cross_align: CrossAlignment,
     owned: bool,
 }
-lazy_static! {
-    pub static ref MAGIC_STRUCT: [OwnedAlignment; 0x10000] = build_magic();
+
+struct StonePattern(Vec<Stone>);
+
+impl StonePattern {
+    fn into_inner(self) -> Vec<Stone> {
+        self.0
+    }
 }
 
-pub fn build_magic() -> [OwnedAlignment; 0x10000] {
+impl FromStr for StonePattern {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(StonePattern(
+            s.as_bytes()
+                .into_iter()
+                .map(|b| match b {
+                    46 => Ok(Stone::Empty),
+                    120 => Ok(Stone::Black),
+                    111 => Ok(Stone::White),
+                    _ => Err(()),
+                })
+                .collect::<Result<Vec<_>, ()>>()?,
+        ))
+    }
+}
+
+lazy_static! {
+    pub static ref MAGIC_STRUCT: [OwnedAlignment; 0x10000] =
+        build_magic().expect("Failed to generate magic struct");
+}
+
+pub fn build_magic() -> Result<[OwnedAlignment; 0x10000], ()> {
     let mut magic = [OwnedAlignment {
         align: Alignment::NoAlign,
         owned: false,
     }; 0x10000];
 
     let mut count = 0;
-    let mut pattern = vec![Stone::Black; 5];
 
-    // xxxxx
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Five);
+    count += magic_init_pattern(
+        &mut magic,
+        &"xxxxx".parse::<StonePattern>()?.into_inner(),
+        Alignment::Five,
+    );
 
-    // .xxxx.
-    pattern[0] = Stone::Empty;
-    pattern.push(Stone::Empty);
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenFour);
+    count += magic_init_pattern(
+        &mut magic,
+        &".xxxx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::OpenFour,
+    );
 
-    // oxxxx.
-    pattern[0] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Four);
-    pattern[5] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Four);
-    pattern[0] = Stone::Empty;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Four);
+    count += magic_init_pattern(
+        &mut magic,
+        &"oxxxx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::Four,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &".xxxxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Four,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &"oxxxxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Four,
+    );
 
-    // .xxx.
-    pattern.pop();
-    pattern[4] = Stone::Empty;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenThree);
+    count += magic_init_pattern(
+        &mut magic,
+        &".xxx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::OpenThree,
+    );
 
-    // oxxx.
-    pattern[0] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
-    pattern[4] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
-    pattern[0] = Stone::Empty;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+    count += magic_init_pattern(
+        &mut magic,
+        &"oxxx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &".xxxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &"oxxxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
 
-    // .x.xx.
-    pattern.push(Stone::Empty);
-    pattern[4] = Stone::Black;
-    pattern[2] = Stone::Empty;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenThree);
+    count += magic_init_pattern(
+        &mut magic,
+        &".x.xx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::OpenThree,
+    );
 
-    // ox.xx.
-    pattern[0] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
-    pattern[5] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
-    pattern[0] = Stone::Empty;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+    count += magic_init_pattern(
+        &mut magic,
+        &"ox.xx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &".x.xxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &"ox.xxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
 
-    // .xx.x.
-    pattern[5] = Stone::Empty;
-    pattern[2] = Stone::Black;
-    pattern[3] = Stone::Empty;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::OpenThree);
+    count += magic_init_pattern(
+        &mut magic,
+        &".xx.x.".parse::<StonePattern>()?.into_inner(),
+        Alignment::OpenThree,
+    );
 
-    // oxx.x.
-    pattern[0] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
-    pattern[5] = Stone::White;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
-    pattern[0] = Stone::Empty;
-    count += magic_init_pattern(&mut magic, &pattern, Alignment::Three);
+    count += magic_init_pattern(
+        &mut magic,
+        &"oxx.x.".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &".xx.xo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
+    count += magic_init_pattern(
+        &mut magic,
+        &"oxx.xo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Three,
+    );
+
+    count += magic_init_pattern(&mut magic,
+        &".xx.xx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::Four,
+    );
+    count += magic_init_pattern(&mut magic,
+        &"oxx.xx.".parse::<StonePattern>()?.into_inner(),
+        Alignment::Four,
+    );
+    count += magic_init_pattern(&mut magic,
+        &".xx.xxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Four,
+    );
+    count += magic_init_pattern(&mut magic,
+        &"oxx.xxo".parse::<StonePattern>()?.into_inner(),
+        Alignment::Four,
+    );
 
     println!("Initialized {}/65536 patterns", count);
 
-    magic
+    Ok(magic)
 }
 
 pub fn magic_init_pattern(
