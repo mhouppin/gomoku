@@ -6,7 +6,7 @@ use std::ops::{
 
 use super::types::{File, Rank, Square, ROW_SIZE};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Bitboard([u64; 6]);
 
 impl Bitboard {
@@ -28,8 +28,21 @@ impl Bitboard {
         0x0000010000200004,
     ]);
 
+    pub const BOTTOM_EDGE: Self = Self([
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x0000000000000000,
+        0x000001FFFFC00000,
+    ]);
+
     pub fn new() -> Self {
         Self([0; 6])
+    }
+
+    pub fn raw_buffer(&self) -> [u64; 6] {
+        self.0
     }
 
     pub fn get_square(&self, sq: Square) -> bool {
@@ -53,7 +66,7 @@ impl Bitboard {
     }
 
     pub fn shift_down(&self) -> Self {
-        *self << ROW_SIZE as u32
+        (*self & !Self::BOTTOM_EDGE) << ROW_SIZE as u32
     }
 
     pub fn shift_left(&self) -> Self {
@@ -69,10 +82,10 @@ impl Display for Bitboard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut rank = Rank::FIRST;
 
-        while rank < Rank::LAST {
+        while rank <= Rank::LAST {
             let mut file = File::FIRST;
 
-            while file < File::LAST {
+            while file <= File::LAST {
                 write!(
                     f,
                     "{}",
@@ -204,9 +217,43 @@ impl ShrAssign<u32> for Bitboard {
         let mut carry = 0;
 
         for i in 0..6 {
-            let next_carry = self.0[i] << (64 - rhs);
-            self.0[i] = (self.0[i] >> rhs) | carry;
+            let next_carry = self.0[5 - i] << (64 - rhs);
+            self.0[5 - i] = (self.0[5 - i] >> rhs) | carry;
             carry = next_carry;
         }
+    }
+}
+
+pub struct BitboardIter {
+    base_bb: [u64; 6],
+    cur_slot: usize,
+}
+
+impl BitboardIter {
+    pub fn from_bitboard(bitboard: &Bitboard) -> Self {
+        Self {
+            base_bb: bitboard.raw_buffer(),
+            cur_slot: 0,
+        }
+    }
+}
+
+impl Iterator for BitboardIter {
+    type Item = Square;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        for i in self.cur_slot..6 {
+            if self.base_bb[i] != 0 {
+                self.cur_slot = i;
+
+                let bitidx = self.base_bb[i].trailing_zeros();
+
+                self.base_bb[i] &= self.base_bb[i] - 1;
+
+                return Some(Square::new((i as u32 * 64 + bitidx) as u16));
+            }
+        }
+
+        None
     }
 }

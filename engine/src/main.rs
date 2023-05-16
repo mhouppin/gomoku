@@ -1,7 +1,14 @@
-mod engine;
+#[macro_use]
+extern crate lazy_static;
 
-use engine::bitboard::Bitboard;
+pub mod core;
+pub mod engine;
+
+use crate::core::bitboard::Bitboard;
+use crate::core::board::Board;
+use crate::core::types::{File, Rank, Square, Stone};
+use crate::engine::movegen::Movegen;
 
 fn main() {
-    print!("{}", Bitboard::LEFT_EDGE);
+    println!("{}", crate::core::magic::MAGIC_STRUCT.len());
 }
