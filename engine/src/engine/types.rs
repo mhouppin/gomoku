@@ -182,3 +182,13 @@ pub enum Stone {
     Black,
     White,
 }
+
+impl Stone {
+    pub fn flip(&self) -> Stone {
+        match *self {
+            Self::Black => Self::White,
+            Self::White => Self::Black,
+            Self::Empty => Self::Empty,
+        }
+    }
+}

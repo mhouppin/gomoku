@@ -4,7 +4,7 @@ use std::ops::{
     ShrAssign,
 };
 
-use super::types::{ROW_SIZE, File, Rank, Square};
+use super::types::{File, Rank, Square, ROW_SIZE};
 
 #[derive(Clone, Copy)]
 pub struct Bitboard([u64; 6]);
