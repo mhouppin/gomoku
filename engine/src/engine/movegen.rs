@@ -53,6 +53,12 @@ impl Movegen {
     }
 }
 
+impl Default for Movegen {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl fmt::Display for Movegen {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for i in 0..self.move_list.len() {
