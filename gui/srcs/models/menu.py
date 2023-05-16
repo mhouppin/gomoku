@@ -14,7 +14,7 @@ class Menu:
 
     __instance: pygame_menu.Menu | None
     __surface: pygame.Surface
-    __tilte: str
+    __title: str
     __size: Coordinate
     __theme: pygame_menu.themes.Theme
     __buttons: list[Button]
@@ -48,6 +48,12 @@ class Menu:
 
     @overload
     def add_button(self, name: str, callback: Callable) -> None:
+        ...
+
+    def add_button(
+        self, name: str, callback: Callable | pygame_menu.events.MenuAction
+    ) -> None:
+        """Add a button to the menu"""
         self.__buttons.append(Button(name=name, callback=callback))
 
     def set_default_instance(self) -> None:
@@ -61,9 +67,33 @@ class Menu:
         )
 
         for button in self.__buttons:
-            self.__instance.add.button(button.name, button.callback)
+            self.__instance.add.button(button.name, button.callback, self)
 
-    def run(self) -> None:
+    def disable(self) -> None:
+        """Disable the menu"""
+        self.__instance.disable()
+
+    def enable(self) -> None:
+        """Enable the menu"""
+        self.__instance.enable()
+
+    def is_enabled(self) -> bool:
+        """Check if the menu is enable"""
+        return self.__instance.is_enabled()
+
+    def update(self) -> None:
+        """Update the menu"""
+        if self.__instance is None:
+            raise InstanceMenuExecption("You need to create the instance first")
+        self.__instance.update(pygame.event.get())
+
+    def draw(self) -> None:
+        """Draw the menu"""
+        if self.__instance is None:
+            raise InstanceMenuExecption("You need to create the instance first")
+        self.__instance.draw(self.__surface)
+
+    def render(self) -> None:
         """Run the menu"""
         if self.__instance is None:
             raise InstanceMenuExecption("You need to create the instance first")

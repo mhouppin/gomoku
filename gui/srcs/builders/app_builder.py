@@ -10,9 +10,10 @@ class AppBuilder:
     def __init__(self) -> None:
         self.app = App()
 
-    def reset(self) -> None:
+    def reset(self) -> "AppBuilder":
         """Reset the app attribute"""
         self.app = App()
+        return self
 
     def set_windows_size(self, width: int, height: int) -> "AppBuilder":
         """Set the windows_size attribute"""
@@ -25,16 +26,16 @@ class AppBuilder:
         self.app.set_menu_title(title)
         return self
 
-    def set_menu_dark_theme(self) -> "AppBuilder":
+    def set_dark_theme(self) -> "AppBuilder":
         """Set the dark theme"""
         self.app.init_menu()
-        self.app.set_menu_dark_theme()
+        self.app.set_dark_theme()
         return self
 
-    def set_menu_light_theme(self) -> "AppBuilder":
+    def set_light_theme(self) -> "AppBuilder":
         """Set the light theme"""
         self.app.init_menu()
-        self.app.set_menu_light_theme()
+        self.app.set_light_theme()
         return self
 
     def add_menu_button(self, name: str, callback: Callable) -> "AppBuilder":

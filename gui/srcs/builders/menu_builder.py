@@ -12,9 +12,10 @@ class MenuBuilder:
     def __init__(self) -> None:
         self.menu = Menu()
 
-    def reset(self) -> None:
+    def reset(self) -> "MenuBuilder":
         """Reset the menu attribute"""
         self.menu = Menu()
+        return self
 
     def set_title(self, title: str) -> "MenuBuilder":
         """Set the title attribute"""
@@ -38,7 +39,7 @@ class MenuBuilder:
 
     def set_light_theme(self) -> "MenuBuilder":
         """Set the light theme"""
-        self.menu.set_theme(pygame_menu.themes.THEME_BLUE)
+        self.menu.set_theme(pygame_menu.themes.THEME_DEFAULT)
         return self
 
     def set_surface(self, surface: pygame.Surface) -> "MenuBuilder":
@@ -46,9 +47,9 @@ class MenuBuilder:
         self.menu.set_surface(surface)
         return self
 
-    def add_button(self, name: str, callback: Callable) -> "MenuBuilder":
+    def add_button(self, name: str, callback: Callable, *args) -> "MenuBuilder":
         """Add a button to the menu"""
-        self.menu.add_button(name, callback)
+        self.menu.add_button(name, callback, *args)
         return self
 
     def add_quit_button(self) -> "MenuBuilder":

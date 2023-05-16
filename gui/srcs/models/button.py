@@ -15,5 +15,10 @@ class Button:
 
     @overload
     def __init__(self, name: str, callback: Callable) -> None:
+        ...
+
+    def __init__(
+        self, name: str, callback: Callable | pygame_menu.events.MenuAction
+    ) -> None:
         self.name = name
         self.callback = callback
