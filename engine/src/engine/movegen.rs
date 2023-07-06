@@ -1,3 +1,5 @@
+use rand::{rngs::ThreadRng, RngCore};
+
 use crate::core::{
     bitboard::{Bitboard, BitboardIter},
     board::Board,
@@ -50,6 +52,12 @@ impl Movegen {
         for square in BitboardIter::from_bitboard(&mask) {
             self.move_list.push(square)
         }
+    }
+
+    pub fn select_random_move(&self) -> Square {
+        let mut rng = ThreadRng::default();
+
+        self.move_list[rng.next_u64() as usize % self.move_list.len()]
     }
 }
 

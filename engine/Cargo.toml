@@ -1,9 +1,11 @@
 [package]
 name = "kinko"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
+authors = [ "Morgan Houppin <morganhouppin@gmail.com>" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lazy_static = "1.4.0"
+lazy_static = "1.4"
+rand = "0.8"

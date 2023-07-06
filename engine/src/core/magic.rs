@@ -213,31 +213,31 @@ pub fn magic_init_pattern(
 
     let range = 3i32.pow(9 - pattern.len() as u32);
 
-    for c in 0..range {
-        let mut ci = c;
+    for stone_combination in 0..range {
+        let mut stone_iterator = stone_combination;
 
         for value in base.iter_mut().take(9 - pattern.len()) {
-            *value = match ci % 3 {
+            *value = match stone_iterator % 3 {
                 0 => Stone::Empty,
                 1 => Stone::Black,
                 _ => Stone::White,
             };
 
-            ci /= 3;
+            stone_iterator /= 3;
         }
 
         let mut shift = base;
-        let mut p = 0;
+        let mut rotation = 0;
 
         while shift[4] != Stone::Black {
             let left = shift[0];
 
-            for r in 0..8 {
-                shift[r] = shift[r + 1];
+            for rot_idx in 0..8 {
+                shift[rot_idx] = shift[rot_idx + 1];
             }
 
             shift[8] = left;
-            p += 1;
+            rotation += 1;
         }
 
         magic[stones_to_mask(&shift) as usize] = OwnedAlignment { align, owned: true };
@@ -257,11 +257,11 @@ pub fn magic_init_pattern(
             align
         );
 
-        for _ in p..9 - pattern.len() {
+        for _ in rotation..9 - pattern.len() {
             let left = shift[0];
 
-            for r in 0..8 {
-                shift[r] = shift[r + 1];
+            for rot_idx in 0..8 {
+                shift[rot_idx] = shift[rot_idx + 1];
             }
 
             shift[8] = left;

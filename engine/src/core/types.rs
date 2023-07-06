@@ -1,6 +1,7 @@
 use std::cmp::{PartialEq, PartialOrd};
 use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign};
+use std::str::FromStr;
 
 pub const ROW_SIZE: u16 = 19;
 pub const SQUARE_COUNT: u16 = ROW_SIZE * ROW_SIZE;
@@ -25,6 +26,19 @@ impl File {
 impl fmt::Display for File {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", (97 + self.0) as char)
+    }
+}
+
+impl FromStr for File {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() != 1 {
+            return Err(());
+        }
+        Ok(File::new(
+            <u8>::try_from(s.chars().next().ok_or(())?).map_err(|_| ())? - 97,
+        ))
     }
 }
 
@@ -75,7 +89,15 @@ impl Rank {
 
 impl fmt::Display for Rank {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:02}", self.0)
+        write!(f, "{:02}", self.0 + 1)
+    }
+}
+
+impl FromStr for Rank {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Rank::new(s.parse().map_err(|_| ())?) - 1)
     }
 }
 
@@ -164,6 +186,17 @@ impl Square {
 impl fmt::Display for Square {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}{}", self.file(), self.rank())
+    }
+}
+
+impl FromStr for Square {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let f = s.get(0..1).ok_or(())?;
+        let r = s.get(1..).ok_or(())?;
+
+        Ok(Square::from(f.parse()?, r.parse()?))
     }
 }
 

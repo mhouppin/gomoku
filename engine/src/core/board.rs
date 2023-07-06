@@ -1,8 +1,8 @@
 use super::bitboard::{Bitboard, BitboardIter};
-use super::types::{Square, Stone, BOARD_SIZE};
+use super::types::{File, Rank, Square, Stone, BOARD_SIZE};
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Board {
     bitsets: [Bitboard; 2],
     table: [Stone; BOARD_SIZE],
@@ -34,6 +34,39 @@ impl Board {
         }
     }
 
+    pub fn setup_position(&mut self, grid: &str, turn: &str) {
+        self.reset();
+
+        let ranks = grid.split('/');
+
+        for (rank_idx, rank_str) in ranks.enumerate() {
+            let mut empty_span = 0;
+            let rank = Rank::new(rank_idx as u8);
+            let mut file = File::new(0);
+
+            for b in rank_str.chars() {
+                if let Some(value) = b.to_digit(10) {
+                    empty_span = empty_span * 10 + value;
+                } else {
+                    file += empty_span as u8;
+                    empty_span = 0;
+                    if b == 'x' {
+                        self.add_stone(Square::from(file, rank), Stone::Black);
+                    } else if b == 'o' {
+                        self.add_stone(Square::from(file, rank), Stone::White);
+                    }
+                    file += 1;
+                }
+            }
+        }
+
+        match turn {
+            "w" => Stone::White,
+            "b" => Stone::Black,
+            _ => Stone::Black,
+        };
+    }
+
     pub fn from_raw_parts(black: Bitboard, white: Bitboard, turn: Stone) -> Self {
         let mut board = Self {
             bitsets: [black, white],
@@ -58,6 +91,17 @@ impl Board {
             Stone::White => self.bitsets[1],
             Stone::Empty => !(self.bitsets[0] | self.bitsets[1]),
         }
+    }
+
+    fn add_stone(&mut self, sq: Square, stone: Stone) {
+        self.table[sq.value() as usize] = stone;
+        self.bitsets[if stone == Stone::Black { 0 } else { 1 }].set_square(sq);
+    }
+
+    pub fn reset(&mut self) {
+        self.bitsets = [Bitboard::new(); 2];
+        self.table = [Stone::Empty; BOARD_SIZE];
+        self.turn = Stone::Black;
     }
 
     pub fn push(&mut self, sq: Square) {
