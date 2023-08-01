@@ -1,8 +1,11 @@
 use std::str::FromStr;
 
-use super::types::Stone;
+use super::{
+    board::Board,
+    types::{Direction, Square, Stone},
+};
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Alignment {
     NoAlign,
     Three,
@@ -18,7 +21,45 @@ pub struct OwnedAlignment {
     owned: bool,
 }
 
-#[derive(Clone, Copy)]
+impl OwnedAlignment {
+    pub fn from(board: &Board, sq: Square, dir: Direction, opp_dir: Direction) -> Self {
+        let mut stone_buffer = [Stone::Empty; 9];
+        let mut s = sq;
+
+        for i in 0..=4 {
+            stone_buffer[4 + i] = board.stone_at(s);
+
+            let next = s.shift(dir);
+
+            if !next.is_valid() || s.distance(next) > 1 {
+                break;
+            }
+
+            s = next;
+        }
+
+        s = sq;
+
+        for i in 0..4 {
+            let next = s.shift(opp_dir);
+
+            if !next.is_valid() || s.distance(next) > 1 {
+                break;
+            }
+
+            s = next;
+            stone_buffer[3 - i] = board.stone_at(s);
+        }
+
+        MAGIC_STRUCT[stones_to_mask(&stone_buffer) as usize]
+    }
+
+    pub fn align(&self) -> Alignment {
+        self.align
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub enum CrossAlignment {
     NoAlign,
     Three,
@@ -31,6 +72,24 @@ pub enum CrossAlignment {
     OpenFourThree,
     FourFour,
     Five,
+}
+
+impl CrossAlignment {
+    pub fn from(board: &Board, sq: Square) -> Self {
+        if OwnedAlignment::from(board, sq, Direction::South, Direction::North).align()
+            == Alignment::Five
+            || OwnedAlignment::from(board, sq, Direction::East, Direction::West).align()
+                == Alignment::Five
+            || OwnedAlignment::from(board, sq, Direction::SouthEast, Direction::NorthWest).align()
+                == Alignment::Five
+            || OwnedAlignment::from(board, sq, Direction::SouthWest, Direction::NorthEast).align()
+                == Alignment::Five
+        {
+            CrossAlignment::Five
+        } else {
+            CrossAlignment::NoAlign
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -79,124 +138,124 @@ pub fn build_magic() -> Result<[OwnedAlignment; 0x10000], PatternError> {
         owned: false,
     }; 0x10000];
 
-    let mut count = 0;
+    let mut _count = 0;
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"xxxxx".parse::<StonePattern>()?.into_inner(),
         Alignment::Five,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xxxx.".parse::<StonePattern>()?.into_inner(),
         Alignment::OpenFour,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxxxx.".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xxxxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxxxxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xxx.".parse::<StonePattern>()?.into_inner(),
         Alignment::OpenThree,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxxx.".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xxxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxxxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".x.xx.".parse::<StonePattern>()?.into_inner(),
         Alignment::OpenThree,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"ox.xx.".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".x.xxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"ox.xxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xx.x.".parse::<StonePattern>()?.into_inner(),
         Alignment::OpenThree,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxx.x.".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xx.xo".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxx.xo".parse::<StonePattern>()?.into_inner(),
         Alignment::Three,
     );
 
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xx.xx.".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxx.xx.".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &".xx.xxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
-    count += magic_init_pattern(
+    _count += magic_init_pattern(
         &mut magic,
         &"oxx.xxo".parse::<StonePattern>()?.into_inner(),
         Alignment::Four,
     );
 
-    println!("Initialized {}/65536 patterns", count);
+    // println!("Initialized {}/65536 patterns", _count);
 
     Ok(magic)
 }
@@ -243,6 +302,7 @@ pub fn magic_init_pattern(
         magic[stones_to_mask(&shift) as usize] = OwnedAlignment { align, owned: true };
         count += 1;
 
+        /*
         println!(
             "Init [{}{}{}{}{}{}{}{}{}] as {:?}, owned",
             shift[0],
@@ -256,6 +316,7 @@ pub fn magic_init_pattern(
             shift[8],
             align
         );
+        */
 
         for _ in rotation..9 - pattern.len() {
             let left = shift[0];
@@ -280,6 +341,7 @@ pub fn magic_init_pattern(
             };
             count += 1;
 
+            /*
             println!(
                 "Init [{}{}{}{}{}{}{}{}{}] as {:?}, not owned",
                 shift[0],
@@ -293,6 +355,7 @@ pub fn magic_init_pattern(
                 shift[8],
                 align
             );
+            */
         }
     }
 

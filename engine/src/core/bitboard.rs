@@ -45,6 +45,14 @@ impl Bitboard {
         self.0
     }
 
+    pub fn len(&self) -> usize {
+        self.0.iter().map(|x| x.count_ones()).sum::<u32>() as usize
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0 == [0u64; 6]
+    }
+
     pub fn get_square(&self, sq: Square) -> bool {
         ((self.0[(sq.value() / 64) as usize] >> (sq.value() % 64)) & 1) != 0
     }

@@ -98,6 +98,10 @@ impl Board {
         self.bitsets[if stone == Stone::Black { 0 } else { 1 }].set_square(sq);
     }
 
+    pub fn stone_at(&self, sq: Square) -> Stone {
+        self.table[sq.value() as usize]
+    }
+
     pub fn reset(&mut self) {
         self.bitsets = [Bitboard::new(); 2];
         self.table = [Stone::Empty; BOARD_SIZE];
