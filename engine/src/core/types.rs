@@ -21,6 +21,10 @@ impl File {
     pub fn new(value: u8) -> Self {
         Self(value)
     }
+
+    pub fn value(self) -> u8 {
+        self.0
+    }
 }
 
 impl fmt::Display for File {
@@ -85,6 +89,10 @@ impl Rank {
     pub fn new(value: u8) -> Self {
         Self(value)
     }
+
+    pub fn value(self) -> u8 {
+        self.0
+    }
 }
 
 impl fmt::Display for Rank {
@@ -137,6 +145,7 @@ impl SubAssign<u8> for Rank {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum Direction {
     North,
     South,
@@ -171,15 +180,30 @@ impl Square {
 
     pub fn shift(self, dir: Direction) -> Self {
         match dir {
-            Direction::North => self - ROW_SIZE,
+            Direction::North => self.wrapping_sub(ROW_SIZE),
             Direction::South => self + ROW_SIZE,
             Direction::East => self + 1,
-            Direction::West => self - 1,
-            Direction::NorthEast => self - ROW_SIZE + 1,
-            Direction::NorthWest => self - ROW_SIZE - 1,
+            Direction::West => self.wrapping_sub(1),
+            Direction::NorthEast => self.wrapping_sub(ROW_SIZE - 1),
+            Direction::NorthWest => self.wrapping_sub(ROW_SIZE + 1),
             Direction::SouthEast => self + ROW_SIZE + 1,
             Direction::SouthWest => self + ROW_SIZE - 1,
         }
+    }
+
+    pub fn wrapping_sub(self, value: u16) -> Self {
+        Self(self.0.wrapping_sub(value))
+    }
+
+    pub fn is_valid(self) -> bool {
+        self.0 < SQUARE_COUNT
+    }
+
+    pub fn distance(self, other: Self) -> u8 {
+        let file_distance = self.file().value().abs_diff(other.file().value());
+        let rank_distance = self.rank().value().abs_diff(other.rank().value());
+
+        file_distance.max(rank_distance)
     }
 }
 

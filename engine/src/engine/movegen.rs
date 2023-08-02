@@ -3,7 +3,7 @@ use rand::{rngs::ThreadRng, RngCore};
 use crate::core::{
     bitboard::{Bitboard, BitboardIter},
     board::Board,
-    types::{Square, Stone, BOARD_SIZE},
+    types::{File, Rank, Square, Stone, BOARD_SIZE},
 };
 
 use std::fmt;
@@ -11,17 +11,25 @@ use std::fmt;
 #[derive(Debug)]
 pub struct Movegen {
     move_list: Vec<Square>,
+    move_idx: usize,
 }
 
 impl Movegen {
     pub fn new() -> Self {
         Self {
             move_list: Vec::with_capacity(BOARD_SIZE),
+            move_idx: 0,
         }
     }
 
     pub fn generate_near(&mut self, board: &Board) {
         let occupancy = board.bitboard(Stone::Black) | board.bitboard(Stone::White);
+
+        if occupancy.is_empty() {
+            self.move_list
+                .push(Square::from(File::new(9), Rank::new(9)))
+        }
+
         let mut mask = occupancy;
 
         mask |= mask.shift_up() | mask.shift_down();
@@ -33,6 +41,12 @@ impl Movegen {
 
     pub fn generate_far(&mut self, board: &Board) {
         let occupancy = board.bitboard(Stone::Black) | board.bitboard(Stone::White);
+
+        if occupancy.is_empty() {
+            self.move_list
+                .push(Square::from(File::new(9), Rank::new(9)))
+        }
+
         let mut mask = occupancy;
 
         mask |= mask.shift_up() | mask.shift_down();
@@ -64,6 +78,20 @@ impl Movegen {
 impl Default for Movegen {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl Iterator for Movegen {
+    type Item = Square;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.move_idx >= self.move_list.len() {
+            None
+        } else {
+            let sq = self.move_list[self.move_idx];
+            self.move_idx += 1;
+            Some(sq)
+        }
     }
 }
 
