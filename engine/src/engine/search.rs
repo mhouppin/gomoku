@@ -240,7 +240,7 @@ pub fn search(
     data.set_seldepth(ply);
 
     if depth == 0 {
-        return Score::cp(0);
+        return eval::evaluate(board);
     }
 
     let mut movegen = Movegen::new();
@@ -250,6 +250,8 @@ pub fn search(
     } else {
         movegen.generate_near(board);
     }
+
+    movegen.order_moves(board);
 
     let mut bestscore = Score::MIN;
 

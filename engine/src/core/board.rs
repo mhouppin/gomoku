@@ -85,6 +85,10 @@ impl Board {
         board
     }
 
+    pub fn turn(&self) -> Stone {
+        self.turn
+    }
+
     pub fn bitboard(&self, side: Stone) -> Bitboard {
         match side {
             Stone::Black => self.bitsets[0],

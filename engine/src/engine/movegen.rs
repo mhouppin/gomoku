@@ -1,8 +1,10 @@
+use permutation::permutation;
 use rand::{rngs::ThreadRng, RngCore};
 
 use crate::core::{
     bitboard::{Bitboard, BitboardIter},
     board::Board,
+    magic::CrossAlignment,
     types::{File, Rank, Square, Stone, BOARD_SIZE},
 };
 
@@ -72,6 +74,17 @@ impl Movegen {
         let mut rng = ThreadRng::default();
 
         self.move_list[rng.next_u64() as usize % self.move_list.len()]
+    }
+
+    pub fn order_moves(&mut self, board: &Board) {
+        let move_aligns = self
+            .move_list
+            .iter()
+            .map(|&sq| CrossAlignment::after(board, sq, board.turn()))
+            .collect::<Vec<_>>();
+        let perm = permutation::sort_by(move_aligns, |a, b| b.cmp(a));
+
+        self.move_list = perm.apply_slice(&self.move_list);
     }
 }
 

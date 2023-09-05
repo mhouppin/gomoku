@@ -8,4 +8,5 @@ authors = [ "Morgan Houppin <morganhouppin@gmail.com>" ]
 
 [dependencies]
 lazy_static = "1.4"
+permutation = "0.4.1"
 rand = "0.8"

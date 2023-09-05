@@ -5,7 +5,7 @@ use super::{
     types::{Direction, Square, Stone},
 };
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Alignment {
     NoAlign,
     Three,
@@ -54,12 +54,52 @@ impl OwnedAlignment {
         MAGIC_STRUCT[stones_to_mask(&stone_buffer) as usize]
     }
 
+    pub fn after(
+        board: &Board,
+        sq: Square,
+        turn: Stone,
+        dir: Direction,
+        opp_dir: Direction,
+    ) -> Self {
+        let mut stone_buffer = [Stone::Empty; 9];
+        let mut s = sq;
+
+        stone_buffer[4] = turn;
+
+        for i in 1..=4 {
+            stone_buffer[4 + i] = board.stone_at(s);
+
+            let next = s.shift(dir);
+
+            if !next.is_valid() || s.distance(next) > 1 {
+                break;
+            }
+
+            s = next;
+        }
+
+        s = sq;
+
+        for i in 0..4 {
+            let next = s.shift(opp_dir);
+
+            if !next.is_valid() || s.distance(next) > 1 {
+                break;
+            }
+
+            s = next;
+            stone_buffer[3 - i] = board.stone_at(s);
+        }
+
+        MAGIC_STRUCT[stones_to_mask(&stone_buffer) as usize]
+    }
+
     pub fn align(&self) -> Alignment {
         self.align
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum CrossAlignment {
     NoAlign,
     Three,
@@ -75,20 +115,51 @@ pub enum CrossAlignment {
 }
 
 impl CrossAlignment {
-    pub fn from(board: &Board, sq: Square) -> Self {
-        if OwnedAlignment::from(board, sq, Direction::South, Direction::North).align()
-            == Alignment::Five
-            || OwnedAlignment::from(board, sq, Direction::East, Direction::West).align()
-                == Alignment::Five
-            || OwnedAlignment::from(board, sq, Direction::SouthEast, Direction::NorthWest).align()
-                == Alignment::Five
-            || OwnedAlignment::from(board, sq, Direction::SouthWest, Direction::NorthEast).align()
-                == Alignment::Five
-        {
-            CrossAlignment::Five
-        } else {
-            CrossAlignment::NoAlign
+    fn alignments_to_cross(alignments: &[Alignment; 4]) -> Self {
+        match (alignments[3], alignments[2]) {
+            (Alignment::Five, _) => Self::Five,
+            (Alignment::OpenFour | Alignment::Four, Alignment::OpenFour | Alignment::Four) => {
+                Self::FourFour
+            }
+            (Alignment::OpenFour, Alignment::OpenThree | Alignment::Three) => Self::OpenFourThree,
+            (Alignment::Four, Alignment::OpenThree) => Self::OpenFourThree,
+            (Alignment::Four, Alignment::Three) => Self::FourThree,
+            (Alignment::OpenThree, Alignment::OpenThree) => Self::DoubleOpenThree,
+            (Alignment::OpenThree | Alignment::Three, Alignment::OpenThree | Alignment::Three) => {
+                Self::DoubleThree
+            }
+            (Alignment::OpenFour, _) => Self::OpenFour,
+            (Alignment::Four, _) => Self::Four,
+            (Alignment::OpenThree, _) => Self::OpenThree,
+            (Alignment::Three, _) => Self::Three,
+            _ => Self::NoAlign,
         }
+    }
+
+    pub fn from(board: &Board, sq: Square) -> Self {
+        let mut alignments = [
+            OwnedAlignment::from(board, sq, Direction::South, Direction::North).align(),
+            OwnedAlignment::from(board, sq, Direction::East, Direction::West).align(),
+            OwnedAlignment::from(board, sq, Direction::SouthEast, Direction::NorthWest).align(),
+            OwnedAlignment::from(board, sq, Direction::SouthWest, Direction::NorthEast).align(),
+        ];
+
+        alignments.as_mut_slice().sort_unstable();
+        Self::alignments_to_cross(&alignments)
+    }
+
+    pub fn after(board: &Board, sq: Square, turn: Stone) -> Self {
+        let mut alignments = [
+            OwnedAlignment::after(board, sq, turn, Direction::South, Direction::North).align(),
+            OwnedAlignment::after(board, sq, turn, Direction::East, Direction::West).align(),
+            OwnedAlignment::after(board, sq, turn, Direction::SouthEast, Direction::NorthWest)
+                .align(),
+            OwnedAlignment::after(board, sq, turn, Direction::SouthWest, Direction::NorthEast)
+                .align(),
+        ];
+
+        alignments.as_mut_slice().sort_unstable();
+        Self::alignments_to_cross(&alignments)
     }
 }
 
@@ -302,22 +373,6 @@ pub fn magic_init_pattern(
         magic[stones_to_mask(&shift) as usize] = OwnedAlignment { align, owned: true };
         count += 1;
 
-        /*
-        println!(
-            "Init [{}{}{}{}{}{}{}{}{}] as {:?}, owned",
-            shift[0],
-            shift[1],
-            shift[2],
-            shift[3],
-            shift[4],
-            shift[5],
-            shift[6],
-            shift[7],
-            shift[8],
-            align
-        );
-        */
-
         for _ in rotation..9 - pattern.len() {
             let left = shift[0];
 
@@ -340,22 +395,6 @@ pub fn magic_init_pattern(
                 owned: false,
             };
             count += 1;
-
-            /*
-            println!(
-                "Init [{}{}{}{}{}{}{}{}{}] as {:?}, not owned",
-                shift[0],
-                shift[1],
-                shift[2],
-                shift[3],
-                shift[4],
-                shift[5],
-                shift[6],
-                shift[7],
-                shift[8],
-                align
-            );
-            */
         }
     }
 
